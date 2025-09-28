@@ -2,14 +2,13 @@ import streamlit as st
 import pandas as pd
 import re
 import os
-from openai import OpenAI
 from dotenv import load_dotenv
 from typing import Optional, Dict, Tuple, List
+from langfuse.openai import openai
 
 
 load_dotenv()
 
-client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 # -------------------------------
 # 📂 Wczytanie danych CSV
@@ -153,17 +152,18 @@ def analyze_with_gpt(user_text, dataframe_head):
     i napisz wnioski w kilku zdaniach:
     """
 
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",   # zamiast text-davinci-003
+    resp = openai.chat.completions.create(
+        name="user-analysis",
+        model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "Jesteś pomocnym asystentem analizującym biegi."},
-            {"role": "user", "content": prompt}
+            {"role": "user", "content": prompt},
         ],
         max_tokens=300,
-        temperature=0.7
+        temperature=0.7,
     )
 
-    return response.choices[0].message.content.strip()
+    return resp.choices[0].message.content.strip()
 
 # -------------------------------
 # 🖥️ Interfejs Streamlit
